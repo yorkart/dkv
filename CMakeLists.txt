@@ -11,8 +11,6 @@ include(cmake/protobuf.cmake)
 #include_directories(${source_dir}/src)
 #link_directories(${CMAKE_CURRENT_BINARY_DIR}/protobuf)
 
-#include_directories(${source_dir})
-
 message(STATUS "Using ${PROTOC}")
 message(STATUS "Using ${Protobuf_INCLUDE_DIRS}")
 message(STATUS "Using ${Protobuf_BINARY_DIRS}")
@@ -47,8 +45,6 @@ add_custom_command(
 ###########
 include_directories(${Protobuf_INCLUDE_DIRS})
 #include_directories(${CMAKE_CURRENT_BINARY_DIR}/protobuf/include)
-
-#FIND_LIBRARY()
 
 link_libraries(
 #        dkv PROPERTIES IMPORTED_LOCATION
