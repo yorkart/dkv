@@ -54,8 +54,8 @@ link_libraries(
 )
 
 add_executable(dkv main.cpp ${pb_echo_proto_srcs} ${pb_echo_proto_hdrs})
+add_dependencies(dkv protobuf-external)
 
-#add_dependencies(dkv protobuf-external)
 #add_library(libprotoc IMPORTED STATIC GLOBAL)
 #add_library(libprotobuf IMPORTED STATIC GLOBAL)
 
