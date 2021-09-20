@@ -1,3 +1,7 @@
 [submodule "third-party/grpc"]
 	path = third-party/grpc
 	url = https://github.com/grpc/grpc.git
+[submodule "third-party/rocksdb"]
+	path = third-party/rocksdb
+	url = https://github.com/facebook/rocksdb.git
+	branch = 6.24.fb
