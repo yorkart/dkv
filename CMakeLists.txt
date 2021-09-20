@@ -5,38 +5,52 @@ set(CMAKE_CXX_STANDARD 11)
 #SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #SET(THIRD_PARTY_PATH ${CMAKE_CURRENT_BINARY_DIR}/third-party)
 
-include(cmake/protobuf.cmake)
+option(GRPC_AS_SUBMODULE "submodule" ON)
+include(cmake/common.cmake)
 
-#EXternalProject_Get_Property(protobuf-external source_dir)
-#include_directories(${source_dir}/src)
-#link_directories(${CMAKE_CURRENT_BINARY_DIR}/protobuf)
+# Proto output dir
+set(PB_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generator)
+file(MAKE_DIRECTORY ${PB_OUTPUT})
 
-message(STATUS "Using ${PROTOC}")
-message(STATUS "Using ${Protobuf_INCLUDE_DIRS}")
-message(STATUS "Using ${Protobuf_BINARY_DIRS}")
+# Proto file
+get_filename_component(hw_proto      "./proto/helloworld.proto" ABSOLUTE)
+get_filename_component(hw_proto_path "${hw_proto}"              PATH)
 
-###########
-# proto lib
-###########
-include_directories(${Protobuf_INCLUDE_DIRS})
-#include_directories(${CMAKE_CURRENT_BINARY_DIR}/protobuf/include)
+# Generated sources
+set(hw_proto_srcs "${PB_OUTPUT}/helloworld.pb.cc")
+set(hw_proto_hdrs "${PB_OUTPUT}/helloworld.pb.h")
+set(hw_grpc_srcs  "${PB_OUTPUT}/helloworld.grpc.pb.cc")
+set(hw_grpc_hdrs  "${PB_OUTPUT}/helloworld.grpc.pb.h")
 
-link_libraries(
-#        dkv PROPERTIES IMPORTED_LOCATION
-        "${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib/libprotobuf-lited.a"
-        "${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib/libprotobufd.a"
-        "${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib/libprotocd.a"
-)
+add_custom_command(
+        OUTPUT "${hw_proto_srcs}" "${hw_proto_hdrs}" "${hw_grpc_srcs}" "${hw_grpc_hdrs}"
+        COMMAND ${_PROTOBUF_PROTOC}
+        ARGS --grpc_out "${PB_OUTPUT}"
+        --cpp_out "${PB_OUTPUT}"
+        -I "${hw_proto_path}"
+        --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+        "${hw_proto}"
+        DEPENDS "${hw_proto}")
 
-################
-# grpc
-################
-include(cmake/grpc.cmake)
+# Include generated *.pb.h files
+include_directories("${PB_OUTPUT}")
 
-add_executable(dkv main.cpp ${pb_echo_proto_srcs} ${pb_echo_proto_hdrs})
-add_dependencies(dkv protobuf-external)
+# hw_grpc_proto
+add_library(hw_grpc_proto
+        ${hw_grpc_srcs}
+        ${hw_grpc_hdrs}
+        ${hw_proto_srcs}
+        ${hw_proto_hdrs})
 
-#add_library(libprotoc IMPORTED STATIC GLOBAL)
-#add_library(libprotobuf IMPORTED STATIC GLOBAL)
+target_link_libraries(hw_grpc_proto
+        ${_REFLECTION}
+        ${_GRPC_GRPCPP}
+        ${_PROTOBUF_LIBPROTOBUF})
 
-#target_link_libraries(dkv protobuf)
+add_executable(dkv main.cpp)
+
+target_link_libraries(dkv
+        hw_grpc_proto
+        ${_REFLECTION}
+        ${_GRPC_GRPCPP}
+        ${_PROTOBUF_LIBPROTOBUF})
