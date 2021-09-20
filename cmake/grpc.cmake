@@ -1,4 +1,9 @@
-include(ExternalProject)
+include(FetchContent)
 
-SET(GRPC_PROJECT "extern_grpc")
-set(GRPC_ROOT  ${BOOST_SOURCES_DIR}/third-party/grpc)
+FetchContent_Declare(
+        gRPC
+        GIT_REPOSITORY https://github.com/grpc/grpc
+        GIT_TAG        v1.28.0
+)
+set(FETCHCONTENT_QUIET OFF)
+FetchContent_MakeAvailable(gRPC)

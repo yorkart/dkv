@@ -33,3 +33,28 @@ set(Protobuf_BINARY_DIRS  ${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib)
 #EXternalProject_Get_Property(protobuf-external source_dir)
 #include_directories(${source_dir}/src)
 #link_directories(${CMAKE_CURRENT_BINARY_DIR}/protobuf)
+
+#############
+# generator
+#############
+# Proto output dir
+set(PB_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generator)
+file(MAKE_DIRECTORY ${PB_OUTPUT})
+
+# Proto file
+get_filename_component(pb_echo_proto "./proto/pb_echo.proto" ABSOLUTE)
+get_filename_component(pb_echo_proto_path "${pb_echo_proto}" PATH)
+message(STATUS "pb_echo_proto      ${pb_echo_proto}")
+message(STATUS "pb_echo_proto_path ${pb_echo_proto_path}")
+
+# Generated sources
+set(pb_echo_proto_srcs "${PB_OUTPUT}/pb_echo.pb.cc")
+set(pb_echo_proto_hdrs "${PB_OUTPUT}/pb_echo.pb.h")
+message(STATUS "pb_echo_proto_srcs ${pb_echo_proto_srcs}")
+message(STATUS "pb_echo_proto_hdrs ${pb_echo_proto_hdrs}")
+
+# generate proto struct
+add_custom_command(
+        OUTPUT  ${pb_echo_proto_srcs} ${pb_echo_proto_hdrs}
+        COMMAND ${PROTOC} --proto_path ${pb_echo_proto_path} --cpp_out=${PB_OUTPUT} ${pb_echo_proto}
+        DEPENDS ${pb_echo_proto})

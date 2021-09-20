@@ -15,31 +15,6 @@ message(STATUS "Using ${PROTOC}")
 message(STATUS "Using ${Protobuf_INCLUDE_DIRS}")
 message(STATUS "Using ${Protobuf_BINARY_DIRS}")
 
-#############
-# generator
-#############
-# Proto output dir
-set(PB_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generator)
-file(MAKE_DIRECTORY ${PB_OUTPUT})
-
-# Proto file
-get_filename_component(pb_echo_proto "./proto/pb_echo.proto" ABSOLUTE)
-get_filename_component(pb_echo_proto_path "${pb_echo_proto}" PATH)
-message(STATUS "pb_echo_proto      ${pb_echo_proto}")
-message(STATUS "pb_echo_proto_path ${pb_echo_proto_path}")
-
-# Generated sources
-set(pb_echo_proto_srcs "${PB_OUTPUT}/pb_echo.pb.cc")
-set(pb_echo_proto_hdrs "${PB_OUTPUT}/pb_echo.pb.h")
-message(STATUS "pb_echo_proto_srcs ${pb_echo_proto_srcs}")
-message(STATUS "pb_echo_proto_hdrs ${pb_echo_proto_hdrs}")
-
-# generate proto struct
-add_custom_command(
-        OUTPUT  ${pb_echo_proto_srcs} ${pb_echo_proto_hdrs}
-        COMMAND ${PROTOC} --proto_path ${pb_echo_proto_path} --cpp_out=${PB_OUTPUT} ${pb_echo_proto}
-        DEPENDS ${pb_echo_proto})
-
 ###########
 # proto lib
 ###########
@@ -52,6 +27,11 @@ link_libraries(
         "${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib/libprotobufd.a"
         "${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/lib/libprotocd.a"
 )
+
+################
+# grpc
+################
+include(cmake/grpc.cmake)
 
 add_executable(dkv main.cpp ${pb_echo_proto_srcs} ${pb_echo_proto_hdrs})
 add_dependencies(dkv protobuf-external)
