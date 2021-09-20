@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 project(dkv)
 
 set(CMAKE_CXX_STANDARD 11)
 #SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #SET(THIRD_PARTY_PATH ${CMAKE_CURRENT_BINARY_DIR}/third-party)
 
+SET(THIRD_PARTY_PATH ${CMAKE_CURRENT_BINARY_DIR})
 option(GRPC_AS_SUBMODULE "submodule" ON)
 include(cmake/common.cmake)
 
@@ -49,8 +50,15 @@ target_link_libraries(hw_grpc_proto
 
 add_executable(dkv main.cpp)
 
+include(cmake/gflags.cmake)
+include(cmake/snappy.cmake)
+#include(cmake/zlib.cmake)
+include(cmake/rocksdb.cmake)
+#include_directories(${CMAKE_CURRENT_BINARY_DIR}/rocksdb)
+
 target_link_libraries(dkv
         hw_grpc_proto
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
-        ${_PROTOBUF_LIBPROTOBUF})
+        ${_PROTOBUF_LIBPROTOBUF}
+        rocksdb)
